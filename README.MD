@@ -38,13 +38,12 @@ python validacao_setup.py
 ```
 
 ## 📊 Estrutura de Resultados
-Ao finalizar a execução, o script imprimirá uma **Tabela de Validação** diretamente no terminal, detalhando o CV de cada período e o status de aprovação. 
+Ao finalizar a execução, o script imprimirá uma **Tabela de Validação** diretamente no terminal, detalhando o CV de cada período e o status de aprovação.
 
 Além disso, uma pasta chamada `resultados/` será criada automaticamente no diretório do script, contendo os artefatos visuais exigidos para o relatório:
 
-1. **`5_1_boxplot_n_X.png`**: Série de boxplots individuais demonstrando a dispersão dos quartis e *outliers* para cada tamanho de $n$.
-2. **`5_2_histograma.png`**: Grade de histogramas com curvas de densidade (KDE), permitindo a observação do ruído do Sistema Operacional e a separação clara entre as diferentes ordens de grandeza.
-3. **`5_3_cv_barras.png`**: Gráfico consolidado do Coeficiente de Variação, exibindo o limite rígido de aprovação marcado com uma linha vermelha em **15%**.
+1. **`5_1_5_2_boxplot_histograma.png`**: Figura unificada em grade $2 \times 5$ com boxplots (linha superior) e histogramas com curva de densidade KDE (linha inferior) para cada tamanho de $n$. Os eixos Y dos boxplots são independentes entre si, permitindo visualizar a dispersão de cada $n$ individualmente sem compressão de escala.
+2. **`5_3_cv_barras.png`**: Gráfico consolidado do Coeficiente de Variação, exibindo o limite rígido de aprovação marcado com uma linha vermelha em **15%**.
 
 ---
 *Projeto desenvolvido para a disciplina de Engenharia de Programas*

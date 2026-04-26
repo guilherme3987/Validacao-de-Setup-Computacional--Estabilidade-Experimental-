@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import seaborn as sns
 
-# 1. Especificações da Metodologia
+
 N_VALUES = [100, 500, 1000, 2000, 3000]
 REPETITIONS = 30
 PERIODS = ['T1', 'T2', 'T3']
@@ -49,7 +49,7 @@ def main():
     melhor_periodo = stats.groupby('Periodo')['CV'].mean().idxmin()
 
     # ------------------------------------------------------------------ #
-    # --- Tabela de Validação: Tamanho | T1 | T2 | T3 | Status        --- #
+    # --- Tabela de Validação: Tamanho | T1 | T2 | T3 | Status       --- #
     # ------------------------------------------------------------------ #
     tabela = stats.pivot(index='n', columns='Periodo', values='CV').reset_index()
     tabela.columns.name = None
@@ -97,44 +97,38 @@ def main():
         'grid.alpha':        0.4,
     })
 
-    # ------------------------------------------------------------------ #
-    # --- Gráficos 5.1: BOXPLOTS INDIVIDUAIS (um arquivo por n)       --- #
-    # ------------------------------------------------------------------ #
-    for n_val, color in zip(N_VALUES, palette):
-        n_str  = str(n_val)
+    # ------------------------------------------------------------------------------------------- #
+    # --- Figuras 5.1 / 5.2: GRADE 2×5 — Boxplots (linha 1)  Histogramas+KDE (linha 2)        --- #
+    # ------------------------------------------------------------------------------------------- #
+    fig, axes = plt.subplots(
+        nrows=2, ncols=len(n_order),
+        figsize=(30, 14),
+        gridspec_kw={'hspace': 0.45, 'wspace': 0.30}
+    )
+
+    axes_box  = axes[0]   # linha superior  → boxplots
+    axes_hist = axes[1]   # linha inferior  → histogramas + KDE
+
+    for col, (n_str, color) in enumerate(zip(n_order, palette)):
+        n_val  = int(n_str)
         subset = df_plot[df_plot['n_str'] == n_str]
 
-        fig, ax = plt.subplots(figsize=(7, 6))
-
+        #  Boxplot  #
+        ax_b = axes_box[col]
         sns.boxplot(
             y='Tempo', data=subset,
             color=color, width=0.4,
-            linewidth=1.5, ax=ax
+            linewidth=1.5, ax=ax_b
         )
+        ax_b.set_title(f'n = {n_val}', fontsize=18, pad=10, fontweight='bold')
+        ax_b.set_ylabel('Tempo (s)' if col == 0 else '', fontsize=14, labelpad=8)
+        ax_b.set_xlabel('')
+        ax_b.set_xticks([])
+        ax_b.tick_params(axis='y', labelsize=12)
+        fmt_sci(ax_b, axis='y')
 
-        ax.set_title(f'n = {n_val}  ({melhor_periodo})', fontsize=16, pad=12)
-        ax.set_ylabel('Tempo de Execução (s)', fontsize=13)
-        ax.set_xlabel('')
-        ax.set_xticks([])
-        fmt_sci(ax, axis='y')
-
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, f'5_1_boxplot_n_{n_val}.png'),
-                    dpi=300, bbox_inches='tight')
-        plt.close()
-
-    # ------------------------------------------------------------------ #
-    # --- Gráfico 5.2: HISTOGRAMAS + KDE em grade (1 × 5 subplots)    --- #
-    # ------------------------------------------------------------------ #
-    fig, axes = plt.subplots(
-        nrows=1, ncols=len(n_order),
-        figsize=(30, 9),
-        sharey=False
-    )
-
-    for ax, n_str, color in zip(axes, n_order, palette):
-        subset = df_plot[df_plot['n_str'] == n_str]
-
+        #  Histograma + KDE  #
+        ax_h = axes_hist[col]
         sns.histplot(
             data=subset, x='Tempo',
             kde=True,
@@ -143,35 +137,43 @@ def main():
             stat='density',
             linewidth=1.5,
             alpha=0.70,
-            ax=ax
+            ax=ax_h
         )
 
-        # Linha vertical da média
         media = subset['Tempo'].mean()
-        ax.axvline(media, color='crimson', linestyle='--',
-                   linewidth=1.8, label=f'Média\n{media:.2e} s')
+        ax_h.axvline(media, color='crimson', linestyle='--',
+                     linewidth=1.8, label=f'Média\n{media:.2e} s')
 
-        ax.set_title(f'n = {int(n_str)}', fontsize=18, pad=10, fontweight='bold')
-        ax.set_xlabel('Tempo (s)', fontsize=14, labelpad=8)
-        ax.set_ylabel('Densidade' if n_str == n_order[0] else '',
-                      fontsize=14, labelpad=8)
-        ax.tick_params(axis='both', labelsize=12)
-        ax.tick_params(axis='x', labelrotation=30)
-        ax.legend(fontsize=11, loc='upper right')
-        fmt_sci(ax, axis='x')   # notação científica no eixo X
+        ax_h.set_xlabel('Tempo (s)', fontsize=14, labelpad=8)
+        ax_h.set_ylabel('Densidade' if col == 0 else '', fontsize=14, labelpad=8)
+        ax_h.tick_params(axis='both', labelsize=12)
+        ax_h.tick_params(axis='x', labelrotation=30)
+        ax_h.legend(fontsize=11, loc='upper right')
+        fmt_sci(ax_h, axis='x')
 
-    fig.suptitle(
-        f'5.2 — Distribuição dos Tempos de Execução por n  ({melhor_periodo})',
-        fontsize=22, fontweight='bold', y=1.03
+    # Rótulos de linha no lado esquerdo
+    axes_box[0].annotate(
+        'Boxplots', xy=(-0.28, 0.5), xycoords='axes fraction',
+        fontsize=16, fontweight='bold', rotation=90,
+        va='center', ha='center', color='#2c3e50'
+    )
+    axes_hist[0].annotate(
+        'Histogramas', xy=(-0.28, 0.5), xycoords='axes fraction',
+        fontsize=16, fontweight='bold', rotation=90,
+        va='center', ha='center', color='#2c3e50'
     )
 
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, '5_2_histograma.png'),
+    fig.suptitle(
+        f'5.1 / 5.2 — Tempos de Execução por n  ({melhor_periodo})',
+        fontsize=24, fontweight='bold', y=1.01
+    )
+
+    plt.savefig(os.path.join(output_dir, '5_1_5_2_boxplot_histograma.png'),
                 dpi=300, bbox_inches='tight')
     plt.close()
 
     # ------------------------------------------------------------------ #
-    # --- Gráfico 5.3: BARRAS DO CV COM LINHA LIMITE (0.15)           --- #
+    # --- Gráfico 5.3: BARRAS DO CV COM LINHA LIMITE (0.15)          --- #
     # ------------------------------------------------------------------ #
     fig, ax = plt.subplots(figsize=(12, 7))
 
