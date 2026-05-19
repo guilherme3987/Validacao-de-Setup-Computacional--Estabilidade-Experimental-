@@ -5,7 +5,7 @@ warnings.filterwarnings("ignore")
 from sorting import quicksort, shell_sort
 from benchmarking import coletar_tempos_para_n
 from models import ajustar_modelos
-from visualization import gerar_grafico, imprimir_relatorio
+from visualization import gerar_graficos_separados, imprimir_relatorio
 
 def main():
     # ── Configurações ──
@@ -70,7 +70,7 @@ def main():
 
     # Gráfico
     todos_Ns = [n for alg in resultados_todos.values() for n in alg["Ns"]]
-    gerar_grafico(resultados_todos, todos_Ns, output_dir=".")
+    gerar_graficos_separados(resultados_todos, todos_Ns, output_dir="resultados/imagens")
 
     print("\n" + "="*60)
     print("  CONCLUSÃO FINAL")
