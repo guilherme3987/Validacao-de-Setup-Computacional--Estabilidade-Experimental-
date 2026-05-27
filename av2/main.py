@@ -5,7 +5,7 @@ warnings.filterwarnings("ignore")
 from sorting import quicksort, shell_sort
 from benchmarking import coletar_tempos_para_n
 from models import ajustar_modelos
-from visualization import gerar_graficos_separados, imprimir_relatorio
+from visualization import gerar_graficos_separados, gerar_grafico_comparativo, imprimir_relatorio
 
 def main():
     # ── Configurações ──
@@ -68,9 +68,10 @@ def main():
 
         imprimir_relatorio(nome_alg, Ns_validos, tempos_validos, cvs_validos, regressoes)
 
-    # Gráfico
+    # ── Gráficos ──
     todos_Ns = [n for alg in resultados_todos.values() for n in alg["Ns"]]
     gerar_graficos_separados(resultados_todos, todos_Ns, output_dir="resultados/imagens")
+    gerar_grafico_comparativo(resultados_todos, output_dir="resultados/imagens")
 
     print("\n" + "="*60)
     print("  CONCLUSÃO FINAL")
@@ -78,7 +79,9 @@ def main():
     for nome_alg, dados in resultados_todos.items():
         melhor = max(dados["regressoes"], key=lambda k: dados["regressoes"][k]["r2"])
         r2 = dados["regressoes"][melhor]["r2"]
+        a, b = dados["regressoes"][melhor]["params"]
         print(f"  {nome_alg:<14} → Melhor ajuste: {melhor}  (R²={r2:.4f})")
+        print(f"  {'':14}   a={a:.4e}  b={b:.4e}")
     print("="*60)
 
 
