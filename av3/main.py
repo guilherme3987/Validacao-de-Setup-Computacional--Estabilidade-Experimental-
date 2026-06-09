@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 def quicksort(arr):
     """Quicksort com pivô mediana-de-três (caso médio robusto)."""
     if len(arr) <= 1:
