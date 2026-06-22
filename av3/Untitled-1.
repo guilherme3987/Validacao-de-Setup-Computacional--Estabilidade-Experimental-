@@ -1,0 +1,322 @@
+---
+marp: true
+theme: uncover
+class: lead
+paginate: true
+---
+## Indução Completa, Expansão Telescópica e F.O.C.A.
+
+**Engenharia de Programas 2026.1** 
+
+Prof. Diego Frias
+Aluno: Guilherme
+
+---
+
+## Introdução
+
+Contagem das operações. Para laços aninhados, essa contagem se traduz em somatórios, para funções recursivas, em relações de recorrência.
+
+1. **Indução Completa** – prova a validade de fórmulas de somatório.
+2. **Expansão Telescópica** – resolve recorrências lineares.
+3. **Paradigma F.O.C.A.** – contagem sistemática de operações primitivas.
+
+---
+
+# 1. Indução Completa
+
+## O Efeito Dominó
+
+A indução completa funciona como uma fileira de dominós:
+
+1. **Passo Base**: derrubamos o primeiro dominó (verificamos para `n = 1`).
+2. **Passo Indutivo**: assumimos que um dominó qualquer cai (para `n = k`) e provamos que ele derruba o próximo (para `n = k+1`).
+
+Se ambos os passos são verdadeiros, a afirmação vale para **todos** os `n` naturais.
+
+---
+
+## Exemplo: Soma dos primeiros `n` números
+
+**Proposição**:  
+$$1 + 2 + \dots + n = \frac{n(n+1)}{2}$$
+
+---
+
+### Passo Base
+
+Para `n = 1`:
+
+$$1 = \frac{1 \cdot 2}{2} = 1 \quad \checkmark$$
+
+---
+
+### Passo Indutivo
+
+**Hipótese** (para `k`):
+
+$$1 + 2 + \dots + k = \frac{k(k+1)}{2}$$
+
+**Tese** (para `k+1`):
+
+$$1 + 2 + \dots + k + (k+1) = \frac{(k+1)(k+2)}{2}$$
+
+---
+
+### Demonstração
+
+$$
+\begin{aligned}
+1 + 2 + \dots + k + (k+1) &= \frac{k(k+1)}{2} + (k+1) \\
+&= (k+1)\left(\frac{k}{2} + 1\right) \\
+&= (k+1)\frac{k+2}{2} \\
+&= \frac{(k+1)(k+2)}{2}
+\end{aligned}
+$$
+
+Vale para todo `n`.
+
+---
+
+# 2. Expansão Telescópica
+
+## Para recorrências lineares
+
+Forma geral:
+
+$$T(n) = T(n-1) + f(n)$$
+
+**Ideia**: escrever a recorrência para `n, n-1, ..., 2`, subtrair as equações de modo que os termos intermediários se cancelem (telescópio), e sobrar apenas `T(n)` e a soma dos `f(i)`.
+
+---
+
+## Exemplo: Laço aninhado dependente
+
+Código:
+
+```python
+for i in range(1, n+1):
+    for j in range(1, i+1):
+        iteracoes += 1
+
+```
+
+Total de iterações:
+
+$$ 1 + 2 + \dots + n $$
+
+---
+
+### Recorrência
+
+Seja `T(n)` o total para dado `n`.
+
+* Quando `i = n`, o laço interno executa `n` vezes.
+* Logo:  T(n) = T(n-1) + n 
+* Condição inicial: `T(1) = 1`
+
+---
+
+### Telescopia – escrita das equações
+
+$$\begin{aligned}
+T(n) - T(n-1) &= n \\
+T(n-1) - T(n-2) &= n-1 \\
+&\vdots \\
+T(2) - T(1) &= 2
+\end{aligned}$$
+
+---
+
+### Somando todas as equações
+
+Lado esquerdo: todos os `T` intermediários se cancelam, sobrando `T(n) - T(1)`.
+
+Lado direito: `2 + 3 + ... + n`.
+
+Portanto:
+
+$$ T(n) - 1 = 2 + 3 + \dots + n $$
+
+$$ T(n) = 1 + 2 + \dots + n $$
+
+---
+
+### Resultado final
+
+Sabemos (pela indução) que:
+
+$$ 1 + 2 + \dots + n = \frac{n(n+1)}{2} $$
+
+Logo:
+
+$$ \boxed{T(n) = \frac{n(n+1)}{2}} $$
+
+
+---
+
+# 3. O Paradigma F.O.C.A.
+
+
+* **F**requência: quantas vezes a linha é executada.
+* **O**perações aritméticas: `+`, `*`, `-`, `/`, etc.
+* **C**usto de gestão: controle de fluxo (inicialização, teste, incremento de laços).
+* **A**tribuições: quantas vezes uma variável recebe um valor.
+
+---
+
+## Exemplo: Cálculo de um elemento da multiplicação de matrizes
+
+Código para calcular `c[i][j]` da matriz produto `C = A × B`, onde `A` tem dimensões `n × m` e `B` tem `m × p`:
+
+```python
+c[i][j] = 0.0
+for k in range(m):
+    c[i][j] = c[i][j] + a[i][k] * b[k][j]
+
+```
+
+Aplicaremos F.O.C.A. passo a passo.
+
+---
+
+### 1. Inicialização
+
+`c[i][j] = 0.0`
+
+* **Frequência**: 1
+* **Atribuições**: 1
+* **Operações**: nenhuma aritmética
+* **Custo total**: 1
+
+---
+
+### 2. Gestão do laço
+
+`for k in range(m)`
+
+* O laço executa `m` iterações.
+* Custo de gestão: `3m + 2` (inicialização de `k`, `m` testes, `m` incrementos, mais a saída do laço).
+
+---
+
+### 3. Corpo do laço
+
+`c[i][j] = c[i][j] + a[i][k] * b[k][j]`
+
+* **Frequência**: `m`
+* **Operações aritméticas**: 1 multiplicação + 1 adição = 2
+* **Atribuições** (por iteração):
+* instanciar `k` (1)
+* ler `a[i][k]` e `b[k][j]` (2)
+* armazenar o produto em variável temporária (1)
+* reescrever `c[i][j]` (1)
+* **total**: 5 atribuições por iteração
+
+
+* **Custo total do corpo**: `m × (2 + 5) = 7m`
+
+---
+
+### Custo de um elemento (Celemento)
+
+Somando os custos:
+
+$$ \text{Celemento} = 1 + (3m + 2) + 7m = 10m + 3 $$
+
+
+---
+## Exemplo
+
+```python
+for i in range(n):          # loop externo
+    for j in range(p):      # loop interno
+        calcula c[i][j]     # Celemento
+
+```
+
+---
+
+### Componentes conhecidos
+
+* **Número de iterações**:
+* `Xloopi = n`
+* `Xloopj = p`
+
+
+* **Custo de gestão**:
+* Externo: `Gext = 3n + 2`
+* Interno: `Gint = 3p + 2`
+
+
+* **Custo do elemento**: `Celemento = 10m + 3`
+
+---
+
+### Fórmula geral de operações
+
+O custo total `N` é dado por:
+
+$$ N = G_{\text{ext}} + X_{\text{loopi}} \cdot G_{\text{int}} + X_{\text{loopi}} \cdot X_{\text{loopj}} \cdot \text{Celemento} $$
+
+---
+
+### Substituição e simplificação
+
+$$\begin{aligned}
+N &= (3n + 2) + n(3p + 2) + n \cdot p \cdot (10m + 3) \\
+  &= 3n + 2 + 3np + 2n + 10npm + 3np \\
+  &= 10npm + 6np + 5n + 2
+\end{aligned}$$
+
+---
+
+### Fórmula final
+
+$$ \boxed{N = 10npm + 6np + 5n + 2} $$
+
+---
+
+## Análise de complexidade
+
+### Pior caso: matrizes quadradas
+
+Quando `n = p = m` (matrizes quadradas de ordem `n`):
+
+$$ N = 10n^3 + 6n^2 + 5n + 2 $$
+
+---
+
+### Complexidade assintótica
+
+Desprezando constantes e termos de menor ordem:
+
+$$ \boxed{O(n^3)} $$
+
+---
+
+### Observação sobre a constante
+
+A constante 10 no termo dominante é um fator relevante: reduzir essa constante resulta em um algoritmo mais eficiente, mesmo mantendo a mesma classe de complexidade.
+
+---
+
+# Conclusão
+
+* **Indução Completa** → demonstra rigorosamente fórmulas de somatório.
+* **Expansão Telescópica** → resolve recorrências lineares, transformando-as em somatórios.
+* **F.O.C.A.** → permite uma contagem precisa de operações primitivas, resultando em funções de custo exatas.
+
+Combinando esses métodos, obtemos:
+
+* Fórmula fechada para o número de iterações.
+* Função de custo detalhada.
+* Complexidade assintótica do algoritmo.
+
+Essas ferramentas são essenciais para a análise e projeto de algoritmos eficientes.
+
+---
+
+# Fim
+
+**Obrigado!**
