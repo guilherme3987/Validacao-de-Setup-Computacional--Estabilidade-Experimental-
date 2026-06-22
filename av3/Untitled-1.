@@ -1,322 +1,325 @@
 ---
 marp: true
-theme: uncover
+theme: gaia
 class: lead
 paginate: true
+math: katex
 ---
+
+# Relatório de Nivelamento:
 ## Indução Completa, Expansão Telescópica e F.O.C.A.
 
-**Engenharia de Programas 2026.1** 
-
-Prof. Diego Frias
-Aluno: Guilherme
-
----
-
-## Introdução
-
-Contagem das operações. Para laços aninhados, essa contagem se traduz em somatórios, para funções recursivas, em relações de recorrência.
-
-1. **Indução Completa** – prova a validade de fórmulas de somatório.
-2. **Expansão Telescópica** – resolve recorrências lineares.
-3. **Paradigma F.O.C.A.** – contagem sistemática de operações primitivas.
+**Docente:** Prof. Dr. Diego Gervasio Frias Suarez  
+**Discente:** Guilherme Dos Santos Modesto Teixeira
 
 ---
 
 # 1. Indução Completa
 
-## O Efeito Dominó
+O método da **Indução Completa** é uma técnica de demonstração matemática utilizada para provar que uma determinada propriedade $P(n)$ é verdadeira para todos os números naturais $n$ a partir de um valor inicial $n_0$.
 
-A indução completa funciona como uma fileira de dominós:
-
-1. **Passo Base**: derrubamos o primeiro dominó (verificamos para `n = 1`).
-2. **Passo Indutivo**: assumimos que um dominó qualquer cai (para `n = k`) e provamos que ele derruba o próximo (para `n = k+1`).
-
-Se ambos os passos são verdadeiros, a afirmação vale para **todos** os `n` naturais.
+### A Analogia do Efeito Dominó:
+* Se o primeiro dominó cai (**passo base**) e se cada dominó, ao cair, derruba o próximo (**passo indutivo**), então todos os dominós cairão.
 
 ---
 
-## Exemplo: Soma dos primeiros `n` números
+#  Indução Completa
 
-**Proposição**:  
-$$1 + 2 + \dots + n = \frac{n(n+1)}{2}$$
+1. **Passo Base:** Verifica-se que a propriedade $P(n)$ é verdadeira para o menor valor do domínio, geralmente $n = 1$ ou $n = 0$.
+2. **Passo Indutivo:** Assume-se que a propriedade é verdadeira para um valor $n = k$ (**hipótese de indução**) e, a partir dessa suposição, demonstra-se que a propriedade também é verdadeira para $n = k + 1$.
 
----
-
-### Passo Base
-
-Para `n = 1`:
-
-$$1 = \frac{1 \cdot 2}{2} = 1 \quad \checkmark$$
+Se ambos os passos forem satisfeitos, conclui-se que $P(n)$ é válida para todo $n \geq n_0$.
 
 ---
 
-### Passo Indutivo
+# Exemplo Prático: Soma de Naturais
 
-**Hipótese** (para `k`):
+**Proposição:** A soma dos $n$ primeiros números naturais é dada por:
+$$1 + 2 + 3 + \dots + n = \frac{n(n+1)}{2}$$
 
+**Demonstração por Indução:**
+Seja $P(n)$ a afirmação de que $\sum_{i=1}^{n} i = \frac{n(n+1)}{2}$.
+
+
+---
+
+
+# Exemplo Prático: Soma de Naturais
+
+* **Passo Base:** Para $n = 1$, temos:
+$$\sum_{i=1}^{1} i = 1 \quad \text{e} \quad \frac{1(1+1)}{2} = \frac{2}{2} = 1$$
+Portanto, $P(1)$ é verdadeira.
+
+
+---
+
+# Demonstração: Passo Indutivo
+
+* **Passo Indutivo:** Suponha que $P(k)$ seja verdadeira para algum $k \geq 1$:
 $$1 + 2 + \dots + k = \frac{k(k+1)}{2}$$
 
-**Tese** (para `k+1`):
-
-$$1 + 2 + \dots + k + (k+1) = \frac{(k+1)(k+2)}{2}$$
+Precisamos provar que $P(k+1)$ também é verdadeira. Partimos da soma até $k+1$:
+$$1 + 2 + \dots + k + (k+1) = \left(1 + 2 + \dots + k\right) + (k+1)$$
 
 ---
 
-### Demonstração
+# Demonstração: Passo Indutivo (Continuação)
 
-$$
-\begin{aligned}
-1 + 2 + \dots + k + (k+1) &= \frac{k(k+1)}{2} + (k+1) \\
-&= (k+1)\left(\frac{k}{2} + 1\right) \\
-&= (k+1)\frac{k+2}{2} \\
-&= \frac{(k+1)(k+2)}{2}
-\end{aligned}
-$$
+Usando a hipótese de indução, substituímos a soma dos $k$ primeiros termos:
 
-Vale para todo `n`.
+$$= \frac{k(k+1)}{2} + (k+1)$$
+$$= (k+1)\left(\frac{k}{2} + 1\right)$$
+$$= (k+1)\left(\frac{k + 2}{2}\right)$$
+$$= \frac{(k+1)(k+2)}{2}$$
+
+Que é exatamente a fórmula para $n = k+1$. Portanto, $P(k+1)$ é verdadeira. Concluímos que a fórmula é válida para todo $n \in \mathbb{N}$.
 
 ---
 
 # 2. Expansão Telescópica
 
-## Para recorrências lineares
-
-Forma geral:
-
+A **Expansão Telescópica** é um método para resolver relações de recorrência lineares de primeira ordem, especialmente aquelas da forma:
 $$T(n) = T(n-1) + f(n)$$
 
-**Ideia**: escrever a recorrência para `n, n-1, ..., 2`, subtrair as equações de modo que os termos intermediários se cancelem (telescópio), e sobrar apenas `T(n)` e a soma dos `f(i)`.
+**A Técnica:** Consiste em escrever a recorrência para valores sucessivos de $n$, de modo que, ao somar todas as equações, os termos $T(n-1), T(n-2)$, etc., se cancelem, restando apenas o termo $T(n)$ e a soma dos $f(i)$.
 
 ---
 
-## Exemplo: Laço aninhado dependente
+# Exemplo Prático: Laço Aninhado Dependente
 
-Código:
+Considere o seguinte código, que conta o número de iterações de um laço aninhado onde o limite do laço interno depende do índice do laço externo:
+O número total de iterações é dado pela soma $1 + 2 + \dots + n$.
 
 ```python
-for i in range(1, n+1):
-    for j in range(1, i+1):
+iteracoes = 0
+for i in range(1, n + 1):
+    for j in range(1, i + 1):
         iteracoes += 1
 
 ```
 
-Total de iterações:
-
-$$ 1 + 2 + \dots + n $$
 
 ---
 
-### Recorrência
+# Modelagem por Recorrência
 
-Seja `T(n)` o total para dado `n`.
+Seja $T(n)$ o número total de iterações para um dado $n$. Observando o comportamento da função, podemos definir a recorrência:
 
-* Quando `i = n`, o laço interno executa `n` vezes.
-* Logo:  T(n) = T(n-1) + n 
-* Condição inicial: `T(1) = 1`
 
----
+$$T(n) = T(n-1) + n$$
 
-### Telescopia – escrita das equações
-
-$$\begin{aligned}
-T(n) - T(n-1) &= n \\
-T(n-1) - T(n-2) &= n-1 \\
-&\vdots \\
-T(2) - T(1) &= 2
-\end{aligned}$$
+com a condição inicial $T(1) = 1$. O termo $n$ representa o número de iterações do laço interno quando o laço externo está na iteração $i = n$.
 
 ---
 
-### Somando todas as equações
+# Resolução por Expansão Telescópica
 
-Lado esquerdo: todos os `T` intermediários se cancelam, sobrando `T(n) - T(1)`.
+Escrevemos a recorrência para os valores de $n$ até a condição inicial:
 
-Lado direito: `2 + 3 + ... + n`.
 
-Portanto:
+$$T(n) = T(n-1) + n$$
 
-$$ T(n) - 1 = 2 + 3 + \dots + n $$
+$$T(n-1) = T(n-2) + (n-1)$$
 
-$$ T(n) = 1 + 2 + \dots + n $$
+$$\vdots$$
+
+$$T(2) = T(1) + 2$$
 
 ---
 
-### Resultado final
+# Isolando as Diferenças
 
-Sabemos (pela indução) que:
+Para facilitar o cancelamento, reescrevemos cada equação isolando a diferença:
 
-$$ 1 + 2 + \dots + n = \frac{n(n+1)}{2} $$
 
-Logo:
+$$T(n) - T(n-1) = n$$
 
-$$ \boxed{T(n) = \frac{n(n+1)}{2}} $$
+$$T(n-1) - T(n-2) = n-1$$
 
+$$\vdots$$
+
+$$T(2) - T(1) = 2$$
+
+---
+
+# Soma e Cancelamento
+
+Somamos todas as equações. No lado esquerdo, todos os termos intermediários se cancelam (telescopia), restando apenas $T(n) - T(1)$:
+
+
+$$T(n) - T(1) = 2 + 3 + \dots + n$$
+
+Isolando $T(n)$ e substituindo $T(1) = 1$:
+
+
+$$T(n) = 1 + 2 + 3 + \dots + n$$
+
+Usando a fórmula provada por indução na seção anterior:
+
+
+$$T(n) = \frac{n(n+1)}{2}$$
+
+A expansão telescópica transforma uma recorrência em um somatório.
 
 ---
 
 # 3. O Paradigma F.O.C.A.
 
 
-* **F**requência: quantas vezes a linha é executada.
-* **O**perações aritméticas: `+`, `*`, `-`, `/`, etc.
-* **C**usto de gestão: controle de fluxo (inicialização, teste, incremento de laços).
-* **A**tribuições: quantas vezes uma variável recebe um valor.
+* **Funções (F):** Número de chamadas a funções (incluindo `range`, `len` ou do usuário).
+* **Operações Aritméticas (O):** Soma, subtração, multiplicação, divisão, incremento, decremento, etc.
+* **Comparações (C):** Testes relacionais realizados, incluindo condições de laços (`for`, `while`) e condicionais (`if`, `elif`).
+* **Atribuições (A):** Número de vezes que uma variável recebe um valor.
 
 ---
 
-## Exemplo: Cálculo de um elemento da multiplicação de matrizes
+# Exemplo Prático: Multiplicação de Matrizes
 
-Código para calcular `c[i][j]` da matriz produto `C = A × B`, onde `A` tem dimensões `n × m` e `B` tem `m × p`:
+Considere o trecho de código que calcula um único elemento $c[i,j]$ da matriz produto $C = A \times B$, onde $A$ tem dimensões $n \times m$ e $B$ tem dimensões $m \times p$.
 
 ```python
-c[i][j] = 0.0
+c[i, j] = 0.0
 for k in range(m):
-    c[i][j] = c[i][j] + a[i][k] * b[k][j]
+    c[i, j] = c[i, j] + a[i, k] * b[k, j]
 
 ```
 
-Aplicaremos F.O.C.A. passo a passo.
+---
+
+# Análise do Elemento por Etapas
+
+1. **Inicialização:** `c[i,j] = 0.0`
+* $A = 1$ (atribuição explícita), $F = 0$, $O = 0$, $C = 0$.
 
 ---
 
-### 1. Inicialização
 
-`c[i][j] = 0.0`
+# Análise do Elemento por Etapas
 
-* **Frequência**: 1
-* **Atribuições**: 1
-* **Operações**: nenhuma aritmética
-* **Custo total**: 1
+2. **Gestão do laço `for`:** `for k in range(m)`
+* O laço executa $m$ iterações.
+* Inicialização de `k`: $A = 1$.
+* Teste de condição (executado $m+1$ vezes): $C = m+1$.
+* Incremento de `k` (executado $m$ vezes): $O = m$.
+* Chamada a `range`: $F = 1$.
+---
+
+
+# Análise do Elemento: Corpo do Laço
+
+3. **Corpo do laço:** `c[i,j] = c[i,j] + a[i,k] * b[k,j]`
+* Frequência: $m$.
+* Operações aritméticas: 2 por iteração (uma multiplicação e uma adição) $\rightarrow O = 2m$.
+* Atribuições: 1 por iteração (atribuição do resultado a $c[i,j]$) $\rightarrow A = m$.
+* Comparações: 0, Funções: 0.
+
+
 
 ---
 
-### 2. Gestão do laço
+# Custo Total de um Elemento
 
-`for k in range(m)`
+Somando os custos para o cálculo de um único elemento:
 
-* O laço executa `m` iterações.
-* Custo de gestão: `3m + 2` (inicialização de `k`, `m` testes, `m` incrementos, mais a saída do laço).
+$$F_{\text{elemento}} = 1 \quad (\text{chamada a range})$$
 
----
+$$O_{\text{elemento}} = m \ (\text{incremento}) + 2m \ (\text{corpo}) = 3m$$
 
-### 3. Corpo do laço
+$$C_{\text{elemento}} = m+1$$
 
-`c[i][j] = c[i][j] + a[i][k] * b[k][j]`
+$$A_{\text{elemento}} = 1 + 1 + m = m+2$$
 
-* **Frequência**: `m`
-* **Operações aritméticas**: 1 multiplicação + 1 adição = 2
-* **Atribuições** (por iteração):
-* instanciar `k` (1)
-* ler `a[i][k]` e `b[k][j]` (2)
-* armazenar o produto em variável temporária (1)
-* reescrever `c[i][j]` (1)
-* **total**: 5 atribuições por iteração
+$$C_{\text{elemento}} = F + O + C + A = 1 + 3m + (m+1) + (m+2)$$
 
-
-* **Custo total do corpo**: `m × (2 + 5) = 7m`
+$$C_{\text{elemento}} = 5m + 4$$
 
 ---
 
-### Custo de um elemento (Celemento)
+# Algoritmo Completo de Multiplicação
 
-Somando os custos:
-
-$$ \text{Celemento} = 1 + (3m + 2) + 7m = 10m + 3 $$
-
-
----
-## Exemplo
+Retomando a estrutura geral do programa para fechar o custo computacional:
 
 ```python
-for i in range(n):          # loop externo
-    for j in range(p):      # loop interno
-        calcula c[i][j]     # Celemento
+for i in range(n):  # loop externo
+    for j in range(p):  # loop interno
+        # calculo de C[i,j] -> Celemento
 
 ```
 
----
-
-### Componentes conhecidos
-
-* **Número de iterações**:
-* `Xloopi = n`
-* `Xloopj = p`
-
-
-* **Custo de gestão**:
-* Externo: `Gext = 3n + 2`
-* Interno: `Gint = 3p + 2`
-
-
-* **Custo do elemento**: `Celemento = 10m + 3`
+O custo total é a soma dos custos de cada laço e do corpo mais interno. Vamos contabilizar separadamente cada categoria.
 
 ---
 
-### Fórmula geral de operações
+# Contabilidade das Camadas de Laço
 
-O custo total `N` é dado por:
+* **Laço externo** ($n$ iterações):
+$F = 1$, $O = n$, $C = n+1$, $A = 1$.
+* **Laço interno** ($p$ iterações por iteração externa):
+* Por iteração externa: $F = 1, O = p, C = p+1, A = 1$.
+* Multiplicado por $n$: $F = n, O = np, C = n(p+1), A = n$.
 
-$$ N = G_{\text{ext}} + X_{\text{loopi}} \cdot G_{\text{int}} + X_{\text{loopi}} \cdot X_{\text{loopj}} \cdot \text{Celemento} $$
 
----
+* **Corpo** (cálculo do elemento): Executado $n \cdot p$ vezes.
+* Total: $F = np, O = 3npm, C = np(m+1), A = np(m+2)$.
 
-### Substituição e simplificação
 
-$$\begin{aligned}
-N &= (3n + 2) + n(3p + 2) + n \cdot p \cdot (10m + 3) \\
-  &= 3n + 2 + 3np + 2n + 10npm + 3np \\
-  &= 10npm + 6np + 5n + 2
-\end{aligned}$$
 
 ---
 
-### Fórmula final
+# Somando as Contribuições por Categoria
 
-$$ \boxed{N = 10npm + 6np + 5n + 2} $$
+$$F_{\text{total}} = 1 + n + np$$
 
----
+$$O_{\text{total}} = n + np + 3npm$$
 
-## Análise de complexidade
+$$C_{\text{total}} = (n+1) + n(p+1) + np(m+1) = 2n + 2np + npm + 1$$
 
-### Pior caso: matrizes quadradas
-
-Quando `n = p = m` (matrizes quadradas de ordem `n`):
-
-$$ N = 10n^3 + 6n^2 + 5n + 2 $$
+$$A_{\text{total}} = 1 + n + np(m+2) = 1 + n + npm + 2np$$
 
 ---
 
-### Complexidade assintótica
+# Função de Custo Final ($N$)
 
-Desprezando constantes e termos de menor ordem:
+O número total de operações primitivas $N$ é a soma de todas as categorias:
 
-$$ \boxed{O(n^3)} $$
+
+$$N = F_{\text{total}} + O_{\text{total}} + C_{\text{total}} + A_{\text{total}}$$
+
+$$N = (1 + n + np) + (n + np + 3npm) + (2n + 2np + npm + 1) + (1 + n + npm + 2np)$$
+
+Agrupando os termos semelhantes:
+
+
+$$N = (1+1+1) + (n + n + 2n + n) + (np + np + 2np + 2np) + (3npm + npm + npm)$$
+
+$$\boxed{N = 5npm + 6np + 5n + 3}$$
 
 ---
 
-### Observação sobre a constante
+# Análise de Complexidade
 
-A constante 10 no termo dominante é um fator relevante: reduzir essa constante resulta em um algoritmo mais eficiente, mesmo mantendo a mesma classe de complexidade.
+Para o pior caso, onde as matrizes são quadradas ($n = p = m$), a função de custo torna-se:
+
+
+$$N = 5n^3 + 6n^2 + 5n + 3$$
+
+Desconsiderando as constantes e os termos de menor ordem, obtemos a complexidade assintótica:
+
+
+$$\boxed{O(n^3)}$$
+
 
 ---
 
 # Conclusão
 
-* **Indução Completa** → demonstra rigorosamente fórmulas de somatório.
-* **Expansão Telescópica** → resolve recorrências lineares, transformando-as em somatórios.
-* **F.O.C.A.** → permite uma contagem precisa de operações primitivas, resultando em funções de custo exatas.
+A análise da complexidade de algoritmos depende diretamente da capacidade de contar e somar repetições.
 
-Combinando esses métodos, obtemos:
-
-* Fórmula fechada para o número de iterações.
-* Função de custo detalhada.
-* Complexidade assintótica do algoritmo.
-
-Essas ferramentas são essenciais para a análise e projeto de algoritmos eficientes.
+* **Indução Completa:** Fornece uma base lógica rigorosa para demonstrar a validade de fórmulas de somatório.
+* **Expansão Telescópica:** É uma ferramenta prática e eficiente para resolver recorrências lineares.
+* **Paradigma F.O.C.A.:** Oferece uma abordagem detalhada para a contagem de operações primitivas, permitindo funções de custo precisas.
 
 ---
 
 # Fim
 
-**Obrigado!**
